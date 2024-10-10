@@ -1,0 +1,55 @@
+-- Platform Creation
+local platform = Instance.new("Part")
+platform.Size = Vector3.new(1000, 1, 1000) -- Large platform (1000x1x1000)
+platform.Position = Vector3.new(0, 100, 0) -- Elevated platform
+platform.Anchored = true
+platform.Parent = game.Workspace
+
+-- Vehicle Management
+local vehicles = {}
+
+-- Automatic Car Entry Detection
+local function onCharacterAdded(character)
+    local humanoid = character:FindFirstChild("Humanoid")
+    if humanoid then
+        local vehicle = character.Parent
+        if vehicle:IsA("Vehicle") then
+            table.insert(vehicles, vehicle)
+            vehicle-Anchored = true
+            vehicle:SetPrimaryPartCFrame(platform.CFrame * CFrame.new(0, 1, 0))
+        end
+    end
+end
+
+game.Players.LocalPlayer.CharacterAdded:Connect(onCharacterAdded)
+
+-- Currency Awarding
+local function awardCurrency(vehicle)
+    local player = game.Players.LocalPlayer
+    local currency = player.leaderstats.Currency -- Replace with your in-game currency
+    currency.Value = currency.Value + 10 -- Award 10 currency units (adjust to your liking)
+end
+
+-- Autonomous Driving
+local function drive(vehicle)
+    while true do
+        -- Drive around the platform, awarding currency
+        vehicle:SetVelocity(platform.CFrame * Vector3.new(50, 0, 0))
+        wait(1)
+        vehicle:SetVelocity(platform.CFrame * Vector3.new(-50, 0, 0))
+        wait(1)
+        awardCurrency(vehicle)
+    end
+end
+
+-- Monitoring and Recovery
+while true do
+    for i, vehicle in pairs(vehicles) do
+        if not vehicle or not vehicle.Parent then
+            table.remove(vehicles, i)
+        else
+            drive(vehicle)
+        end
+    end
+    wait(1)
+end
